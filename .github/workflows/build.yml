@@ -13,32 +13,31 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: "3.10"
 
     - name: Install dependencies
       run: |
         sudo apt update
         sudo apt install -y python3-pip python3-dev git unzip openjdk-17-jdk \
-        zlib1g-dev autoconf automake libtool pkg-config python3-setuptools build-essential curl
+        zlib1g-dev autoconf automake libtool pkg-config python3-setuptools build-essential \
+        python3-distutils
+        pip3 install --user buildozer cython
+        export PATH=$PATH:~/.local/bin
 
-        pip3 install --user cython buildozer
-
-        # Installer Android SDK + NDK
+    - name: Install Android SDK + NDK
+      run: |
         mkdir -p $HOME/android-sdk
-        curl -fo sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
-        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-
-        export ANDROID_HOME=$HOME/android-sdk
-        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
-
-        yes | sdkmanager --licenses
-        sdkmanager "platforms;android-31" "build-tools;33.0.2" "platform-tools" "ndk;21.4.7075529"
+        cd $HOME/android-sdk
+        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O cmdtools.zip
+        unzip cmdtools.zip -d cmdline-tools
+        yes | cmdline-tools/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk \
+          "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;23.1.7779620"
+        echo "$HOME/android-sdk/build-tools/33.0.2" >> $GITHUB_PATH
+        echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
+        echo "$HOME/android-sdk/cmdline-tools/cmdline-tools/bin" >> $GITHUB_PATH
 
     - name: Build APK
       run: |
-        export ANDROID_HOME=$HOME/android-sdk
-        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
         buildozer android debug
 
     - name: Upload APK
