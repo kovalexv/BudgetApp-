@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y python3-pip python3-dev python3-distutils git unzip openjdk-17-jdk \
+        sudo apt install -y python3-pip python3-dev python3.12-distutils git unzip openjdk-17-jdk \
         zlib1g-dev autoconf automake libtool pkg-config python3-setuptools build-essential
         pip3 install --user buildozer
         export PATH=$PATH:~/.local/bin
